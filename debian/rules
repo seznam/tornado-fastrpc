@@ -4,7 +4,7 @@
 # Uncomment this to turn on verbose mode.
 #export DH_VERBOSE=1
 
-export PYBUILD_NAME=tornado_fastrpc
+export PYBUILD_NAME=tornado-fastrpc
 
 %:
 	dh $@ --with python2,python3 --buildsystem=pybuild
