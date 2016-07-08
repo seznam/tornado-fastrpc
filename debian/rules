@@ -1,8 +1,10 @@
 #!/usr/bin/make -f
 # -*- makefile -*-
 
+export DH_ALWAYS_EXCLUDE=.git:*.pyc:*.pyo:__pycache__
+
 # Uncomment this to turn on verbose mode.
-#export DH_VERBOSE=1
+export DH_VERBOSE=1
 
 export PYBUILD_NAME=tornado-fastrpc
 
@@ -13,3 +15,4 @@ override_dh_clean:
 	dh_clean
 	rm -f $(CURDIR)/*.egg
 	rm -f $(CURDIR)/.coverage
+	rm -rf $(CURDIR)/.cache
