@@ -5,6 +5,8 @@ import sys
 from setuptools import setup, find_packages
 from setuptools.command.test import test as TestCommand
 
+from tornado_fastrpc import version
+
 
 class PyTest(TestCommand):
 
@@ -23,7 +25,7 @@ class PyTest(TestCommand):
 
 setup(
     name="tornado-fastrpc",
-    version='0.0.1',
+    version=version,
     author='Jan Seifert (Seznam.cz, a.s.)',
     author_email="jan.seifert@firma.seznam.cz",
     description=(
