@@ -1,6 +1,28 @@
-
 """
 Async HTTP client based on Tornado's AsyncHTTPClient.
+
+Usage::
+
+    class MainHandler(tornado.web.RequestHandler):
+        @tornado.gen.coroutine
+        def get(self):
+            try:
+                res = yield proxy.getData(123)
+            except Exception as e:
+                self.write('Error: {}'.format(e))
+            else:
+                self.write('Data: {}'.format(res.value))
+
+or::
+
+    class MainHandler(tornado.web.RequestHandler):
+        @tornado.gen.coroutine
+        def get(self):
+            res = yield proxy.getData(123, quiet=True)
+            if res.success:
+                self.write('Data: {}'.format(res.value))
+            else:
+                self.write('Error: {}'.format(res.exception))
 """
 
 import collections
@@ -74,27 +96,6 @@ class RpcCall(object):
 class ServerProxy(object):
     """
     Async **FastRPC** client for **Tornado**. It uses **pycurl** backend.
-
-    ::
-
-        @tornado.gen.coroutine
-        def get(self):
-            proxy = ServerProxy('http://example.com:8000/RPC2')
-            result = yield server_proxy.sum(1, 2)
-            self.write("1 + 2 = {}".format(result.value[0]))
-
-    or
-
-    ::
-
-        @tornado.gen.coroutine
-        def get(self):
-            proxy = ServerProxy('http://example.com:8000/RPC2')
-            result = yield server_proxy.sum(1, 2, quiet=True)
-            if result.success:
-                self.write("1 + 2 = {}".format(result.value[0]))
-            else:
-                self.logger.error("Error: %s", result.exception)
     """
 
     user_agent = 'Tornado Async FastRPC client'
@@ -103,6 +104,19 @@ class ServerProxy(object):
     def __init__(self, uri, connect_timeout=5.0, timeout=5.0,
                  use_binary=False, user_agent=None, keep_alive=False,
                  use_http10=True, http_proxy=None, max_clients=10):
+        """
+        All parameters except *url* are optional.
+
+        :arg string url: URL address
+        :arg float connect_timeout: Timeout for initial connection in seconds
+        :arg float request_timeout: Timeout for entire request in seconds
+        :arg bool use_binary: Force binary protocol
+        :arg string user_agent: User-Agent string
+        :arg bool keep_alive: Allow keep-alive connection
+        :arg bool use_http10: Force HTTP/1.0 protocol instead of HTTP/1.1
+        :arg string http_proxy: HTTP proxy, eg. http://user:pass@example.com:80
+        :arg int max_clients: Size of the Curl's connection pool
+        """
         # Check FastRPC support
         if use_binary and fastrpc is None:
             raise NotImplementedError("FastRPC is not supported")
