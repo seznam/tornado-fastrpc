@@ -2,7 +2,7 @@
 
 import sys
 
-from setuptools import setup, find_packages
+from setuptools import setup
 from setuptools.command.test import test as TestCommand
 
 from tornado_fastrpc import version
@@ -46,7 +46,7 @@ setup(
         'Topic :: Software Development :: Libraries :: Python Modules',
     ],
     platforms=['any'],
-    packages=find_packages('tornado_fastrpc'),
+    packages=['tornado_fastrpc'],
     zip_safe=True,
     install_requires=[
         'setuptools>=0.6b1',
