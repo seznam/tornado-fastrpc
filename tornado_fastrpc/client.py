@@ -59,9 +59,9 @@ class RpcCall(object):
     instead of proxy.call_func('bar', 1, 2, 3).
     """
 
-    def __init__(self, proxy, initial_call_path):
+    def __init__(self, proxy, initial_call_path=''):
         self._proxy = proxy
-        self._path = [initial_call_path]
+        self._path = [initial_call_path] if initial_call_path else []
 
     def __call__(self, *args, **kwargs):
         return self._proxy.call_func('.'.join(self._path), *args, **kwargs)

@@ -34,11 +34,19 @@ def test_result():
     assert res.exception == 456
 
 
-def test_rpc_call():
+@pytest.mark.parametrize(
+    'initial_call_path, method_name, expected',
+    [
+        ('', 'baz.bar', 'baz.bar'),
+        ('client', 'baz.bar', 'client.baz.bar'),
+    ]
+)
+def test_rpc_call(initial_call_path, method_name, expected):
     proxy = mock.Mock()
-    call = RpcCall(proxy, 'client')
-    call.baz.bar.foo(1, 'abc')
-    proxy.call_func.assert_called_once_with('client.baz.bar.foo', 1, 'abc')
+    call = RpcCall(proxy, initial_call_path)
+    func = getattr(call, method_name)
+    func(1, 'abc')
+    proxy.call_func.assert_called_once_with(expected, 1, 'abc')
 
 
 def test_init_fail_when_binary_and_not_fastrpc():
