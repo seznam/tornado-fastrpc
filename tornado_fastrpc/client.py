@@ -3,8 +3,15 @@
 Async HTTP client based on Tornado's AsyncHTTPClient.
 """
 
-import urllib.parse
-import xmlrpc.client
+import collections
+try:
+    import urllib.parse as urlparse
+except ImportError:
+    import urlparse
+try:
+    import xmlrpc.client as xmlrpclib
+except ImportError:
+    import xmlrpclib
 
 try:
     import fastrpc
@@ -14,7 +21,7 @@ import pycurl
 import tornado.curl_httpclient
 import tornado.gen
 
-__all__ = ['ServerProxy', 'Fault']
+__all__ = ['Fault', 'Result', 'ServerProxy']
 
 
 class Fault(Exception):
@@ -31,6 +38,18 @@ class Fault(Exception):
         return "<{} {}: {}>".format(
             self.__class__.__name__, self.faultCode, self.faultString
         )
+
+
+Result = collections.namedtuple('Result', ['success', 'value', 'exception'])
+"""
+Return type for FastRPC call. Contains attributes *success*, *value* and
+*exception*.
+
+* *success* is :const:`True` if operation succeeded, else :const:`False`
+* *value* contains returning value if operation succeeded, else :const:`None`
+* *exception* contains instance of the exception if operation failed,
+  else :const:`None`
+"""
 
 
 class RpcCall(object):
@@ -62,12 +81,24 @@ class ServerProxy(object):
         def get(self):
             proxy = ServerProxy('http://example.com:8000/RPC2')
             result = yield server_proxy.sum(1, 2)
-            self.write("1 + 2 = {}".format(result))
+            self.write("1 + 2 = {}".format(result.value[0]))
+
+    or
+
+    ::
+
+        @tornado.gen.coroutine
+        def get(self):
+            proxy = ServerProxy('http://example.com:8000/RPC2')
+            result = yield server_proxy.sum(1, 2, quiet=True)
+            if result.success:
+                self.write("1 + 2 = {}".format(result.value[0]))
+            else:
+                self.logger.error("Error: %s", result.exception)
     """
 
     user_agent = 'Tornado Async FastRPC client'
     http_client_cls = tornado.curl_httpclient.CurlAsyncHTTPClient
-    fault_cls = fastrpc.Fault if fastrpc is not None else xmlrpc.client.Fault
 
     def __init__(self, uri, connect_timeout=5.0, timeout=5.0,
                  use_binary=False, user_agent=None, keep_alive=False,
@@ -77,18 +108,23 @@ class ServerProxy(object):
             raise NotImplementedError("FastRPC is not supported")
 
         self.uri = uri
-        self.host = urllib.parse.urlparse(uri).netloc
+        self.host = urlparse.urlparse(uri).netloc
         self.timeout = timeout
         self.connect_timeout = connect_timeout
         self.use_binary = use_binary
         self.ct = 'application/x-frpc' if use_binary else 'text/xml'
-        self.accept = 'application/x-frpc, text/xml' if fastrpc else 'text/xml'
+        if fastrpc:
+            self.accept = 'application/x-frpc, text/xml'
+            self.fault_cls = fastrpc.Fault
+        else:
+            self.accept = 'text/xml'
+            self.fault_cls = xmlrpclib.Fault
         if user_agent is not None:
             self.user_agent = user_agent
         self.keep_alive = keep_alive
         self.use_http10 = use_http10
         if http_proxy:
-            p = urllib.parse.urlparse(http_proxy)
+            p = urlparse.urlparse(http_proxy)
             self.proxy_host = p.hostname
             self.proxy_port = p.port or 80
             self.proxy_username = p.username
@@ -125,7 +161,7 @@ class ServerProxy(object):
         else:
             c.setopt(pycurl.FORBID_REUSE, 1)
             c.setopt(pycurl.FRESH_CONNECT, 1)
-        c.setopt(pycurl.VERBOSE, 1)
+        c.setopt(pycurl.VERBOSE, 0)
         # https://ravidhavlesha.wordpress.com/2012/01/08/curl-timeout-problem-and-solution/
         c.setopt(pycurl.NOSIGNAL, 1)
 
@@ -138,13 +174,13 @@ class ServerProxy(object):
             )
         return quiet
 
-    def _get_post_body(self, args, name):
+    def _get_post_body(self, name, args):
         if fastrpc is not None:
             return fastrpc.dumps(args, name, useBinary=self.use_binary)
         else:
-            return xmlrpc.client.dumps(args, name, allow_none=True)
+            return xmlrpclib.dumps(args, name, allow_none=True)
 
-    def _make_headers(self):
+    def _get_headers(self):
         headers = {
             'User-Agent': self.user_agent,
             'Host': self.host,
@@ -167,12 +203,27 @@ class ServerProxy(object):
             headers['Connection'] = 'close'
         return headers
 
+    def _get_request(self, name, args):
+        return tornado.httpclient.HTTPRequest(
+            self.uri,
+            method='POST',
+            body=self._get_post_body(name, args),
+            request_timeout=self.timeout,
+            connect_timeout=self.connect_timeout,
+            prepare_curl_callback=self._set_curl_opts,
+            proxy_host=self.proxy_host,
+            proxy_port=self.proxy_port,
+            proxy_username=self.proxy_username,
+            proxy_password=self.proxy_password,
+            headers=self._get_headers()
+        )
+
     def _process_rpc_response(self, response):
         try:
             if fastrpc is not None:
                 response_data = fastrpc.loads(response.body)[0]
             else:
-                response_data = xmlrpc.client.loads(response.body)[0][0]
+                response_data = xmlrpclib.loads(response.body)[0][0]
         except self.fault_cls as e:
             raise Fault(e.faultCode, e.faultString)
         else:
@@ -193,28 +244,16 @@ class ServerProxy(object):
         """
         quiet = self._get_extra_kwargs(kwargs)
         try:
-            request = tornado.httpclient.HTTPRequest(
-                self.uri,
-                method='POST',
-                body=self._get_post_body(args, name),
-                request_timeout=self.timeout,
-                connect_timeout=self.connect_timeout,
-                prepare_curl_callback=self._set_curl_opts,
-                proxy_host=self.proxy_host,
-                proxy_port=self.proxy_port,
-                proxy_username=self.proxy_username,
-                proxy_password=self.proxy_password,
-                headers=self._make_headers()
-            )
-            response = yield self._http_client.fetch(request, raise_error=True)
+            request = self._get_request(name, args)
+            response = yield self._http_client.fetch(request)
             result_data = self._process_rpc_response(response)
         except Exception as e:
             if quiet:
-                raise tornado.gen.Return(e)
+                raise tornado.gen.Return(Result(False, None, e))
             else:
                 raise
         else:
-            raise tornado.gen.Return(result_data)
+            raise tornado.gen.Return(Result(True, result_data, None))
 
     def __getattr__(self, name):
         return RpcCall(self, name)
