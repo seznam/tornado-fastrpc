@@ -1,0 +1,5 @@
+python-tornado-fastrpc (1.0.0~dev) unstable; urgency=medium
+
+  * First release 1.0.0
+
+ -- Jan Seifert <jan.seifert@firma.seznam.cz>  Fri, 08 Jul 2016 09:32:38 +0200
