@@ -3,7 +3,14 @@ Async HTTP client based on Tornado's AsyncHTTPClient.
 
 Usage::
 
-    class MainHandler(tornado.web.RequestHandler):
+    proxy = ServerProxy('http://example.com/RPC2:8000',
+                        connect_timeout=5.0,
+                        timeout=5.0,
+                        use_binary=True)
+
+
+    class BazHandler(tornado.web.RequestHandler):
+
         @tornado.gen.coroutine
         def get(self):
             try:
@@ -13,9 +20,9 @@ Usage::
             else:
                 self.write('Data: {}'.format(res.value))
 
-or::
 
-    class MainHandler(tornado.web.RequestHandler):
+    class BarHandler(tornado.web.RequestHandler):
+
         @tornado.gen.coroutine
         def get(self):
             res = yield proxy.getData(123, quiet=True)
@@ -165,6 +172,8 @@ class ServerProxy(object):
         return self._http_client_inst
 
     def _set_curl_opts(self, c):
+        # Method is called by libcurl, c argument is pycurl.Curl object, see
+        # http://www.tornadoweb.org/en/stable/httpclient.html#request-objects
         if self.use_http10:
             c.setopt(pycurl.HTTP_VERSION, pycurl.CURL_HTTP_VERSION_1_0)
         else:

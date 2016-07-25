@@ -28,7 +28,14 @@ Ussage
 
 ::
 
-    class MainHandler(tornado.web.RequestHandler):
+    proxy = ServerProxy('http://example.com/RPC2:8000',
+                        connect_timeout=5.0,
+                        timeout=5.0,
+                        use_binary=True)
+
+
+    class BazHandler(tornado.web.RequestHandler):
+
         @tornado.gen.coroutine
         def get(self):
             try:
@@ -38,9 +45,9 @@ Ussage
             else:
                 self.write('Data: {}'.format(res.value))
 
-or::
 
-    class MainHandler(tornado.web.RequestHandler):
+    class BarHandler(tornado.web.RequestHandler):
+
         @tornado.gen.coroutine
         def get(self):
             res = yield proxy.getData(123, quiet=True)
@@ -48,6 +55,23 @@ or::
                 self.write('Data: {}'.format(res.value))
             else:
                 self.write('Error: {}'.format(res.exception))
+
+ServerProxy class
+-----------------
+
+class **ServerProxy** (uri, connect_timeout=5.0, timeout=5.0, use_binary=False,
+user_agent=None, keep_alive=False, use_http10=True, http_proxy=None,
+max_clients=10)
+
+- *url* *<string>* URL address
+- *connect_timeout* *<float>* Timeout for initial connection in seconds
+- *request_timeout* *<float>* Timeout for entire request in seconds
+- *use_binary* *<bool>* Force binary protocol
+- *user_agent* *<string>* User-Agent string
+- *keep_alive* *<bool>* Allow keep-alive connection
+- *use_http10* *<bool>* Force HTTP/1.0 protocol instead of HTTP/1.1
+- *http_proxy* *<string>* HTTP proxy, eg. http://user:pass@example.com:80
+- *max_clients* *<int>* Size of the Curl's connection pool
 
 License
 -------
