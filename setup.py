@@ -23,14 +23,25 @@ class PyTest(TestCommand):
         errno = pytest.main(self.pytest_args)
         sys.exit(errno)
 
+description = (
+    "Asynchronous FastPRC client for Python's Tornado"
+)
+
+try:
+    if sys.version_info >= (3,):
+        long_description = open('README.rst', 'rb').read().decode('utf-8')
+    else:
+        long_description = open('README.rst', 'r').read().decode('utf-8')
+except IOError:
+        long_description = description
+
 setup(
     name="tornado-fastrpc",
     version=version,
     author='Jan Seifert (Seznam.cz, a.s.)',
     author_email="jan.seifert@firma.seznam.cz",
-    description=(
-        "Asynchronous FastPRC client for Python's Tornado"
-    ),
+    description=description,
+    long_description=long_description,
     license="commercial",
     url='ssh://git@gitlab.kancelar.seznam.cz:doporucovani/common.git',
     classifiers=[
