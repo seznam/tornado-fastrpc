@@ -126,7 +126,7 @@ class ServerProxy(object):
         self.timeout = timeout
         self.connect_timeout = connect_timeout
         self.use_binary = use_binary
-        self.ct = 'application/x-frpc' if use_binary else 'text/xml'
+        self.content_type = 'application/x-frpc' if use_binary else 'text/xml'
         if fastrpc:
             self.accept = 'application/x-frpc, text/xml'
             self.fault_cls = fastrpc.Fault
@@ -198,7 +198,7 @@ class ServerProxy(object):
         headers = {
             'User-Agent': self.user_agent,
             'Host': self.host,
-            'Content-Type': self.ct,
+            'Content-Type': self.content_type,
             'Accept': self.accept,
             'Accept-Encoding': '',
         }
