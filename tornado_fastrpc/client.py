@@ -186,7 +186,7 @@ class ServerProxy(object):
             raise TypeError(
                 "got an unexpected keyword argument '{}'".format(arg_name)
             )
-        return quiet
+        return (quiet,)
 
     def _get_post_body(self, name, args):
         if fastrpc is not None:
@@ -247,16 +247,15 @@ class ServerProxy(object):
     def call_func(self, name, *args, **kwargs):
         """
         Call RPC function *name* with arguments *args*. If *quiet* is
-        :const:`True` (which is default), call never raises an exception
-        and return value is instance of the exception.
+        :const:`True`, call never raises an exception and return value
+        is instance of the exception.
 
         ::
 
             res = yield proxy.call_func('div', 4, 2)
             res = yield proxy.call_func('div', 4, 0, quiet=True)
-            res = yield proxy.call_func('div', 4, 0, quiet=False)
         """
-        quiet = self._get_extra_kwargs(kwargs)
+        (quiet,) = self._get_extra_kwargs(kwargs)
         try:
             request = self._get_request(name, args)
             response = yield self._http_client.fetch(request)

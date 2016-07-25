@@ -113,9 +113,9 @@ def test_set_curl_opts(server_proxy, patch_attrs, expected_calls):
 @pytest.mark.parametrize(
     'kwargs, expected',
     [
-        ({}, False),
-        ({'quiet': False}, False),
-        ({'quiet': True}, True),
+        ({}, (False,)),
+        ({'quiet': False}, (False,)),
+        ({'quiet': True}, (True,)),
     ]
 )
 def test_get_extra_kwargs(server_proxy, kwargs, expected):
