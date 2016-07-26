@@ -2,7 +2,7 @@
 
 import sys
 
-from setuptools import setup
+from setuptools import setup, Command
 from setuptools.command.test import test as TestCommand
 
 from tornado_fastrpc import version
@@ -20,8 +20,34 @@ class PyTest(TestCommand):
 
     def run_tests(self):
         import pytest
+
         errno = pytest.main(self.pytest_args)
         sys.exit(errno)
+
+
+class BdistDeb(Command):
+
+    description = "create a DEB distribution (using dpkg-buildpackage)"
+    user_options = []
+
+    def initialize_options(self):
+        pass
+
+    def finalize_options(self):
+        pass
+
+    def run(self):
+        import os.path
+        import subprocess
+
+        os.chdir(os.path.dirname(__file__))
+        errno = subprocess.call(['dpkg-buildpackage', '-uc', '-us'])
+        if not errno:
+            print("Now running lintian...")
+            errno = subprocess.call(['lintian'])
+            print("Finished running lintian.")
+        sys.exit(errno)
+
 
 description = (
     "Asynchronous FastPRC client for Python's Tornado"
@@ -77,5 +103,6 @@ setup(
     test_suite='tests',
     cmdclass={
         'test': PyTest,
+        'bdist_deb': BdistDeb,
     },
 )
