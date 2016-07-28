@@ -1,7 +1,7 @@
 Source: python-tornado-fastrpc
 Section: python
 Priority: optional
-Maintainer: Advert <advert-vyvoj@firma.seznam.cz>
+Maintainer: Advert <doporucovani-vyvoj@firma.seznam.cz>
 Uploaders: Jan Seifert <jan.seifert@firma.seznam.cz>
 Build-Depends: debhelper (>= 9.0),
                dh-python,
