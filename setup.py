@@ -69,7 +69,7 @@ setup(
     description=description,
     long_description=long_description,
     license="commercial",
-    url='ssh://git@gitlab.kancelar.seznam.cz:doporucovani/common.git',
+    url='https://github.com/seznam/tornado-fastrpc',
     classifiers=[
         'Operating System :: POSIX :: Linux',
         'Programming Language :: Python :: 2.7',
