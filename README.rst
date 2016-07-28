@@ -80,7 +80,8 @@ keep_alive=False, use_http10=True, http_proxy=None, max_clients=10*)
     Async FastRPC client for Tornado, tt uses ``pycurl`` backend.
     Manages communication with a remote RPC server.
 
-    - **url** *<string>* URL address
+    - **url** *<string>*
+          URL address
     - **connect_timeout** *<float>*
           Timeout for initial connection in seconds
     - **request_timeout** *<float>*
