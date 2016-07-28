@@ -103,6 +103,7 @@ class RpcCall(object):
 class ServerProxy(object):
     """
     Async **FastRPC** client for **Tornado**. It uses **pycurl** backend.
+    Manages communication with a remote RPC server.
     """
 
     user_agent = 'Tornado Async FastRPC client'
