@@ -3,10 +3,10 @@
 tornado-fastrpc
 ===============
 
-Non-blocking FastRPC (see https://github.com/seznam/fastrpc) client
-for Python's Tornado. It supports XML-RPC protocol too, so if FastRPC
-is not available, only XML-RPC protocol will be supported. Python 2.7
-and Python 3.4 (or higher) are supported.
+Non-blocking XML-RPC and FastRPC (see https://github.com/seznam/fastrpc)
+client for Python's Tornado. If FastRPC is not available, only XML-RPC
+protocol will be supported. Python 2.7 and Python 3.4 (or higher) are
+supported.
 
 Instalation
 -----------
@@ -24,11 +24,11 @@ Instalation and tests:
 
 ::
 
-    python setup.py test
     python setup.py install
+    python setup.py test
 
-Build Debian Jessie package (requires ``dpkg-buildpackage`` + ``lintian``,
-see ``Build-Depends`` in ``debian/control`` for all requirements):
+Build Debian Jessie package (requires ``dpkg-buildpackage`` + ``lintian``
+and dependencies in ``Build-Depends`` option in ``debian/control`` file.
 
 ::
 
