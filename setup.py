@@ -50,7 +50,7 @@ class BdistDeb(Command):
 
 
 description = (
-    "Asynchronous FastPRC client for Python's Tornado"
+    "Asynchronous XML-RPC and FastPRC client for Python's Tornado"
 )
 
 try:
