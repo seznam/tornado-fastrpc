@@ -30,7 +30,6 @@ Architecture: any
 Depends: ${python:Depends},
          ${misc:Depends},
          python-fastrpc,
-         python-pkg-resources,
          python-pycurl,
          python-tornado (>= 3.2)
 Description: Async FastRPC for Python's Tornado
@@ -41,7 +40,6 @@ Architecture: any
 Depends: ${python3:Depends},
          ${misc:Depends},
          python3-fastrpc,
-         python3-pkg-resources,
          python3-pycurl,
          python3-tornado (>= 3.2)
 Description: Async FastRPC for Python's Tornado
