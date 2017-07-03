@@ -29,6 +29,7 @@ Instalation and tests:
 
 Build Debian Jessie package (requires ``dpkg-buildpackage`` + ``lintian``
 and dependencies in ``Build-Depends`` option in ``debian/control`` file.
+Before building package, checkout debian-* branch.
 
 ::
 
