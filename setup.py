@@ -68,6 +68,7 @@ setup(
     author_email="jan.seifert@firma.seznam.cz",
     description=description,
     long_description=long_description,
+    long_description_content_type='text/x-rst',
     license="commercial",
     url='https://github.com/seznam/tornado-fastrpc',
     classifiers=[
