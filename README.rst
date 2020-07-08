@@ -1,3 +1,13 @@
+**WARNING**
+
+**tornado-fastrpc** is deprecated, for XML-RPC use
+https://github.com/seifert/async-rpc instead of this library.
+**async-rpc** is based on **asyncio**, so it is not only for
+Tornado, but for **asyncio** in generral. Do you need
+**FastRPC**? Create an issue, I have library for **FastRPC**
+too, but it has not been published yet. However, I thint, it
+never mind, probably nobody outsite Seznam.cz use **FastRPC**
+:-).
 
 ===============
 tornado-fastrpc
